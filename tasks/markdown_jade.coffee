@@ -51,6 +51,8 @@ module.exports = (grunt) ->
   beautifyHTML = require('js-beautify').html
   Entities = require('html-entities').AllHtmlEntities
   {decode} = new Entities()
+  path = require 'path'
+  mkdirp = require 'mkdirp'
 
 
   # Global options hash.
@@ -150,14 +152,14 @@ module.exports = (grunt) ->
     return headerId
 
 
-  grunt.registerMultiTask 'markdown_jade', 'The best Grunt plugin ever.', ->
+  grunt.registerMultiTask 'markdown_jade', 'Turn markdown & template into HTML.', ->
 
     # Default options.
     _options = @options
       id_pattern: /{(.+)}/
       tags: ['h1', 'h2', 'h3']
 
-    _.each @files, ({src, template, dest}) =>
+    _.each @files, ({src, template, dest, ext}) =>
 
       files = _.filter src, (filepath) ->
         if not grunt.file.exists filepath
@@ -174,8 +176,49 @@ module.exports = (grunt) ->
       _.each parsedFilesTuples, ([filepath, data]) ->
         tpl = template or _options.template
 
-        grunt.file.copy tpl, dest,
-          process: (contents, path) ->
-            html = grunt.template.process contents, data: data
-            # Pretty print the html.
-            return if _options.pretty then beautifyHTML(html) else html
+        if not _options.multiple_files
+          grunt.file.copy tpl, dest,
+            process: (contents, path) ->
+              html = grunt.template.process contents, data: data
+              # Pretty print the html.
+              return if _options.pretty then beautifyHTML(html) else html
+        else
+          splitIntoMultipleFiles(data, tpl, dest, ext)
+
+
+  getDataLeaves = (data, pathToRoot=[], res) ->
+    for child in data.children
+      #parent = if data.id then [data.id] else []
+      getDataLeaves(child, _.union(pathToRoot, [data]), res)
+
+    # Don't forget the leave node.
+    pathToRoot.push(data)
+
+    # We're only interested in the leaves.
+    return unless _.isEmpty(data.children)
+
+    # Forget the first part (that's the "header").
+    res.push _.rest(pathToRoot)
+
+
+  splitIntoMultipleFiles = (data, tpl, dest, ext) ->
+    leaves = []
+    getDataLeaves data, [], leaves
+
+    for leavePath in leaves
+      parts = _.union([dest], _.pluck(leavePath, 'id'))
+      leaveDest = path.join.apply @, _.union([dest], _.pluck(leavePath, 'id'))
+
+      leaveDest = "#{leaveDest}#{ext}"
+
+      grunt.log.writeln 'mkdirp', path.dirname(leaveDest)
+
+      mkdirp.sync path.dirname(leaveDest)
+
+      grunt.log.writeln 'last', _.last leavePath
+
+      grunt.file.copy tpl, leaveDest,
+        process: (contents, path) ->
+          html = grunt.template.process contents, data: _.last(leavePath)
+          # Pretty print the html.
+          return if _options.pretty then beautifyHTML(html) else html

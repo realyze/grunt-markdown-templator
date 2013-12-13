@@ -77,6 +77,24 @@ module.exports = (grunt) ->
           }
         ]
 
+      "multiple-files":
+        options:
+          template: "test/fixtures/multiple.html.tpl"
+          id_pattern: /{(.+)}/
+          tags: ['h1', 'h2', 'h3']
+          pretty: true
+          decode: true
+          multiple_files: true
+
+        files: [
+          {
+            src: ["test/fixtures/multiple.md"]
+            dest: "/tmp/"
+            ext: ".html"
+          }
+        ]
+
+
 
     # Unit tests.
     nodeunit:
