@@ -1,7 +1,7 @@
 {
   "name": "grunt-markdown-jade",
   "description": "Generate HTML partials from Markdown.",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "homepage": "https://github.com/realyze/grunt-markdown-jade",
   "author": {
     "name": "Tomas Brambora",
