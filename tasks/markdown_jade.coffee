@@ -211,11 +211,9 @@ module.exports = (grunt) ->
 
       leaveDest = "#{leaveDest}#{ext}"
 
-      grunt.log.writeln 'mkdirp', path.dirname(leaveDest)
+      grunt.log.debug 'mkdirp', path.dirname(leaveDest)
 
       mkdirp.sync path.dirname(leaveDest)
-
-      grunt.log.writeln 'last', _.last leavePath
 
       grunt.file.copy tpl, leaveDest,
         process: (contents, path) ->
