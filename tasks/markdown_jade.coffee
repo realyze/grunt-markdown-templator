@@ -179,7 +179,7 @@ module.exports = (grunt) ->
         if not _options.multiple_files
           grunt.file.copy tpl, dest,
             process: (contents, path) ->
-              html = grunt.template.process contents, data: data
+              html = grunt.template.process contents, data: _.extend(data, _options.data)
               # Pretty print the html.
               return if _options.pretty then beautifyHTML(html) else html
         else
@@ -219,9 +219,7 @@ module.exports = (grunt) ->
 
       grunt.file.copy tpl, leaveDest,
         process: (contents, path) ->
-          html = grunt.template.process contents, data: {
-            section: _.last(leavePath)
-            all: data
-          }
+          html = grunt.template.process contents, _.extend(
+            {section: _.last(leavePath), all: data}, _options.data)
           # Pretty print the html.
           return if _options.pretty then beautifyHTML(html) else html
