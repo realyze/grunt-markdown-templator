@@ -219,7 +219,10 @@ module.exports = (grunt) ->
 
       grunt.file.copy tpl, leaveDest,
         process: (contents, path) ->
-          html = grunt.template.process contents, data: _.extend(
-            {section: _.last(leavePath), all: data}, _options.data)
+          html = grunt.template.process contents, data: _.extend({
+              section: _.last(leavePath)
+              all: data
+              root: leavePath[0]
+            }, _options.data)
           # Pretty print the html.
           return if _options.pretty then beautifyHTML(html) else html
