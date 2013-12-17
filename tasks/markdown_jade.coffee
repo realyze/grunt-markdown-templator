@@ -207,7 +207,7 @@ module.exports = (grunt) ->
 
     for leavePath in leaves
       parts = _.union([dest], _.pluck(leavePath, 'id'))
-      leaveDest = path.join.apply @, _.union([dest], _.pluck(leavePath, 'id'))
+      leaveDest = path.join.apply @, parts
 
       leaveDest = "#{leaveDest}#{ext}"
 
