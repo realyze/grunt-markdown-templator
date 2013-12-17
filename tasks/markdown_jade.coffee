@@ -205,10 +205,15 @@ module.exports = (grunt) ->
     leaves = []
     getDataLeaves data, [], leaves
 
+    tmp = []
+
+    # Add the non-leaf paths to the mix as well (so that we have links to
+    # e.g. foo/bar, i.e., the "section overview page").
+    leaves = _.union leaves, (_.initial(p) for p in leaves)
+
     for leavePath in leaves
       parts = _.union([dest], _.pluck(leavePath, 'id'))
       leaveDest = path.join.apply @, parts
-
       leaveDest = "#{leaveDest}#{ext}"
 
       grunt.log.debug 'mkdirp', path.dirname(leaveDest)
