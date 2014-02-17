@@ -224,7 +224,7 @@ module.exports = (grunt) ->
         process: (contents, path) ->
           html = grunt.template.process contents, data: _.extend({
               section: _.last(leavePath)
-              ids: leavePath
+              ids: _.pluck(leavePath, 'id')
               all: data
               root: leavePath[0]
             }, _options.data)
