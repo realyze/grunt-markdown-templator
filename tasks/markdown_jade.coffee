@@ -75,7 +75,6 @@ module.exports = (grunt) ->
   insert = (data, root) ->
     tag = data[0][0]
 
-    headerId = getHeaderId data
     childTag = _.last _.pluck root.children, 'tag'
 
     if _.isEmpty(root.children) or compareTags(tag, childTag) >= 0
@@ -83,8 +82,11 @@ module.exports = (grunt) ->
       # changing data object.
       getHTML = (data) -> _.union(['html'], JSON.parse JSON.stringify data)
 
+      metadata = getMetadata data
+
       root.children.push
-        id: headerId
+        id: metadata.id
+        metadata: metadata
         content: markdown.renderJsonML(getHTML data)
         header: markdown.renderJsonML(getHTML [data[0]])
         body: markdown.renderJsonML(getHTML _.rest(data))
@@ -133,30 +135,35 @@ module.exports = (grunt) ->
     return root
 
 
-  # Returns header id for a region (accessible in the template).
-  # Either you can specify the id in the Markdown file or it will take the
-  # heading text and slugify it.
-  getHeaderId = (data) ->
+  # Returns metadata for a region (accessible in the template).
+  getMetadata = (data) ->
+    grunt.log.debug 'data', data
+
     text = _.last data[0]
-    {id_pattern} = _options
-    match = text.match id_pattern
+    {metadata_pattern} = _options
+    match = text.match metadata_pattern
+
+    metadata = {}
+
+    grunt.log.debug 'match', text, match
 
     if match
-      # Strip the ID pattern.
-      data[0][data[0].length - 1] = _.trim text.replace(id_pattern, '')
-      headerId = match[1]
+      # Strip the metadata pattern.
+      data[0][data[0].length - 1] = _.trim text.replace(metadata_pattern, '')
+      metadata = JSON.parse match[1]
 
-    # Slugify the header text.
-    headerId or= _(data[0]).chain().last().slugify().value().toLowerCase()
+    metadata.id or= _(data[0]).chain().last().slugify().value().toLowerCase()
 
-    return headerId
+    grunt.log.debug 'meatadata', metadata
+
+    return metadata
 
 
   grunt.registerMultiTask 'markdown_jade', 'Turn markdown & template into HTML.', ->
 
     # Default options.
     _options = @options
-      id_pattern: /{(.+)}/
+      metadata_pattern: /{(.+)}/
       tags: ['h1', 'h2', 'h3']
 
     _.each @files, ({src, template, dest, ext}) =>
@@ -211,12 +218,17 @@ module.exports = (grunt) ->
     # e.g. foo/bar, i.e., the "section overview page").
     leaves = _.union leaves, (_.initial(p) for p in leaves)
 
-    for leavePath in leaves
+    for leavePath in leaves when leavePath.length > 0
       parts = _.union([dest], _.pluck(leavePath, 'id'))
       leaveDest = path.join.apply @, parts
       leaveDest = "#{leaveDest}#{ext}"
 
       grunt.log.debug 'mkdirp', path.dirname(leaveDest)
+      grunt.log.debug 'section',_.pluck(leavePath, 'id'), _.last(leavePath)
+
+      if not _.last(leavePath).body
+        grunt.log.debug "skipping ", _.pluck(leavePath, 'id'), ": no body"
+        continue
 
       mkdirp.sync path.dirname(leaveDest)
 

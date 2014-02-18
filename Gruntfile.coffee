@@ -26,7 +26,7 @@ module.exports = (grunt) ->
       "2-levels":
         options:
           template: "test/fixtures/noodle2.html.tpl"
-          id_pattern: /{(.+)}/
+          metadata_pattern: /{(.+)}/
           tags: ['h1', 'h2', 'h3']
           pretty: true
 
@@ -44,7 +44,7 @@ module.exports = (grunt) ->
       "3-levels":
         options:
           template: "test/fixtures/3-levels.html.tpl"
-          id_pattern: /{(.+)}/
+          metadata_pattern: /{(.+)}/
           tags: ['h1', 'h2', 'h3']
           pretty: true
 
@@ -61,7 +61,7 @@ module.exports = (grunt) ->
       "decode":
         options:
           template: "test/fixtures/decode.html.tpl"
-          id_pattern: /{(.+)}/
+          metadata_pattern: /{(.+)}/
           tags: ['h1', 'h2', 'h3']
           pretty: true
           decode: true
@@ -80,7 +80,7 @@ module.exports = (grunt) ->
       "multiple-files":
         options:
           template: "test/fixtures/multiple.html.tpl"
-          id_pattern: /{(.+)}/
+          metadata_pattern: /{(.+)}/
           tags: ['h1', 'h2', 'h3']
           pretty: true
           decode: true
